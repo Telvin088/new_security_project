@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Incident Report Form</title>
+    <!-- Pikaday CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/pikaday/1.8.2/css/pikaday.min.css">
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <style>
+        #datepicker-container {
+            position: relative;
+        }
+        #datepicker {
+            position: absolute;
+            top: -400px; /* Move the date picker above the input field */
+            z-index: 1000; /* Ensure it is on top of other elements */
+        }
+    </style>
+</head>
+<body>
+<div class="container mt-5">
+    <h2>Incident Report Form</h2>
+    <form id="incidentReportForm">
+        <div class="form-group">
+            <label for="incidentDate">Date</label>
+            <div id="datepicker-container">
+                <input type="text" class="form-control" id="incidentDate" name="incidentDate" required>
+                <div id="datepicker"></div>
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="perpetrator">Perpetrator</label>
+            <input type="text" class="form-control" id="perpetrator" name="perpetrator" required>
+        </div>
+        <div class="form-group">
+            <label for="incidentClassification">Incident Classification</label>
+            <select class="form-control" id="incidentClassification" name="incidentClassification" required>
+                <option value="">Select Classification</option>
+                <option value="violence">Violence</option>
+                <option value="theft">Theft</option>
+                <option value="damage">Damage</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="detailedDescription">Detailed Description</label>
+            <textarea class="form-control" id="detailedDescription" name="detailedDescription" rows="4" required></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary">Submit</button>
+    </form>
+</div>
+
+<!-- Pikaday JS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pikaday/1.8.2/pikaday.min.js"></script>
+<!-- Bootstrap JS -->
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        var dateInput = document.getElementById('incidentDate');
+        var datepickerContainer = document.getElementById('datepicker');
+
+        var picker = new Pikaday({
+            field: dateInput,
+            bound: false,
+            container: datepickerContainer,
+            format: 'YYYY-MM-DD',
+            onSelect: function(date) {
+                dateInput.value = picker.toString();
+            }
+        });
+
+        // Adjust position to ensure it is always on top of the date input field
+        var adjustPosition = function() {
+            var inputRect = dateInput.getBoundingClientRect();
+            var containerRect = datepickerContainer.getBoundingClientRect();
+            datepickerContainer.style.top = (inputRect.top - containerRect.height + window.scrollY) + 'px';
+        };
+
+        adjustPosition();
+        window.addEventListener('resize', adjustPosition);
+        window.addEventListener('scroll', adjustPosition);
+    });
+</script>
+</body>
+</html>

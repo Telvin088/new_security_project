@@ -1,0 +1,165 @@
+{% extends 'base.html' %}
+{% block header %}My Reports{% endblock %}
+{% block title %}My Reports{% endblock %}
+{% block content %}
+<p class="text-zinc-500 dark:text-zinc-400 mt-1 flex gap-2 justify-end mt-3" style="font-size: 14px;">
+    <button id="btn-violence" class="report-button" style="padding: 7px; border-radius: 3px; width: auto; background-color: #3664f4; color: #fff;">Violence</button>
+    <button id="btn-theft" class="report-button" style="padding: 7px; border-radius: 3px; width: auto; background-color:#888; color: #fff;">Theft</button>
+    <button id="btn-damage" class="report-button" style="padding: 7px; border-radius: 3px; width: auto; background-color:#888; color: #fff;">Damage</button>
+</p>
+
+<!-- theft table -->
+<div id="theft-table" style="display: none; background-color: #fff; padding: 15px;" class="mt-3 rounded">
+    <table class="styled-table p-4" style="font-size: 13px;">
+        <thead>
+            <tr>
+                <th></th>
+                <th>ID</th>
+                <th>Date</th>
+                <th>Stolen Items</th>
+                <th>Stolen Value</th>
+                <th>Theft Description</th>
+                <th>Username</th>
+                <!-- You can omit session_id and created_at from display -->
+            </tr>
+        </thead>
+        <tbody>
+            {% for report in theft_reports %}
+            <tr>
+                <td><span class="material-symbols-outlined" style="font-size: 16px;">
+                    check_box_outline_blank
+                    </span></td>
+                <td>{{ report.id }}</td>
+                <td>{{ report.date_time }}</td>
+                <td>{{ report.stolen_items }}</td>
+                <td>{{ report.stolen_value }}</td>
+                <td>{{ report.theft_description }}</td>
+                <td>{{ report.username }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- damage table -->
+<div id="damage-table" style="display: none; background-color: #fff; padding: 15px;" class="mt-3 rounded">
+    <table class="styled-table p-4" style="font-size: 13px;">
+        <thead>
+            <tr>
+                <th></th>
+                <th>ID</th>
+                <th>Date</th>
+                <th>Items Destroyed</th>
+                <th>Value of Destroyed</th>
+                <th>Damage Description</th>
+                <th>Estimated Repair Cost</th>
+                <th>Username</th>
+                <!-- You can omit session_id from display -->
+            </tr>
+        </thead>
+        <tbody>
+            {% for damage in damages %}
+            <tr>
+                <td><span class="material-symbols-outlined" style="font-size: 16px;">
+                    check_box_outline_blank
+                    </span></td>
+                <td>{{ damage.id }}</td>
+                <td>{{ damage.date_time }}</td>
+                <td>{{ damage.items_destroyed }}</td>
+                <td>{{ damage.value_of_destroyed }}</td>
+                <td>{{ damage.damage_description }}</td>
+                <td>{{ damage.estimated_repair }}</td>
+                <td>{{ damage.username }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Reports Table -->
+<div id="reports-table" style="display: none; background-color: #fff; padding: 15px;" class="mt-3 rounded">
+    <table class="styled-table p-4" style="font-size: 13px;">
+        <thead>
+            <tr>
+                <th></th>
+                <th>ID</th>
+                <th>Date</th>
+                <th>Victim Name</th>
+                <th>Victim Age</th>
+                <th>Witness</th>
+                <th>Incident Description</th>
+                <th>Username</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for report in reports %}
+            <tr>
+                <td><span class="material-symbols-outlined" style="font-size: 16px;">
+                    check_box_outline_blank
+                    </span></td>
+                <td>{{ report.id }}</td>
+                <td>{{ report.date_time }}</td>
+                <td>{{ report.victim_name }}</td>
+                <td>{{ report.victim_age }}</td>
+                <td>{{ report.witness }}</td>
+                <td>{{ report.incident_description }}</td>
+                <td>{{ report.username }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<script>
+    // Function to handle button clicks and show/hide respective tables
+    document.addEventListener('DOMContentLoaded', function() {
+        const violenceButton = document.getElementById('btn-violence');
+        const theftButton = document.getElementById('btn-theft');
+        const damageButton = document.getElementById('btn-damage');
+
+        const theftTable = document.getElementById('theft-table');
+        const damageTable = document.getElementById('damage-table');
+        const reportsTable = document.getElementById('reports-table');
+
+        // Initial display when the page loads
+        theftTable.style.display = 'none';
+        damageTable.style.display = 'none';
+        reportsTable.style.display = 'none';
+
+        // Show violence table by default
+        violenceButton.style.backgroundColor = '#3664f4';
+        reportsTable.style.display = 'block';
+
+        // Event listeners for button clicks
+        violenceButton.addEventListener('click', function() {
+            violenceButton.style.backgroundColor = '#3664f4';
+            theftButton.style.backgroundColor = '#888';
+            damageButton.style.backgroundColor = '#888';
+
+            theftTable.style.display = 'none';
+            damageTable.style.display = 'none';
+            reportsTable.style.display = 'block';
+        });
+
+        theftButton.addEventListener('click', function() {
+            violenceButton.style.backgroundColor = '#888';
+            theftButton.style.backgroundColor = '#3664f4';
+            damageButton.style.backgroundColor = '#888';
+
+            theftTable.style.display = 'block';
+            damageTable.style.display = 'none';
+            reportsTable.style.display = 'none';
+        });
+
+        damageButton.addEventListener('click', function() {
+            violenceButton.style.backgroundColor = '#888';
+            theftButton.style.backgroundColor = '#888';
+            damageButton.style.backgroundColor = '#3664f4';
+
+            theftTable.style.display = 'none';
+            damageTable.style.display = 'block';
+            reportsTable.style.display = 'none';
+        });
+    });
+</script>
+{% endblock %}

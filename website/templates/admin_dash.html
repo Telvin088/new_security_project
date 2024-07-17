@@ -1,0 +1,180 @@
+{% extends 'admin_base.html' %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+<style>
+    .status-pending {
+        color: yellow;
+    }
+    .status-assigned {
+        color: green;
+    }
+    .status-other {
+        color: blue;
+    }
+</style>
+<!-- Display all reports in one section -->
+<div class=" p-4 rounded mt-4" style="width: 100%;">
+    <h2 class="text-xl font-semibold text-black">Dashboard Overview</h2>
+    <p class="text-zinc-500 dark:text-zinc-400 mt-1" style="font-size: 14px;">
+        <button id="violence-btn" class="report-btn"
+            style="padding: 5px; border-radius: 3px; width: auto; background-color: #3664f4; color: #fff;">Violence</button>
+        <button id="theft-btn" class="report-btn"
+            style="padding: 5px; border-radius: 3px; width: auto; background-color:#888; color: #fff;">Theft</button>
+        <button id="damage-btn" class="report-btn"
+            style="padding: 5px; border-radius: 3px; width: auto; background-color:#888; color: #fff;">Damage</button>
+    </p>
+    <!-- Table for Violence Reports -->
+    <table id="violence-table" class="styled-table mt-3">
+        <thead>
+            <tr style="font-size: 13px;">
+                <th>Date</th>
+                <th>Victim Name</th>
+                <th>Victim Age</th>
+                <th>Witness</th>
+                <th>Incident Description</th>
+                <th>Username</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for report in reports %}
+            <tr style="font-size: 13px;">
+                <td>{{ report.created_at }}</td>
+                <td>{{ report.victim_name }}</td>
+                <td>{{ report.victim_age }}</td>
+                <td>{{ report.witness }}</td>
+                <td>{{ report.incident_description }}</td>
+                <td>{{ report.username }}</td>
+                <td style="font-weight: bold; color: {{ 'orange' if report.status == 'pending' else 'green' if report.status == 'assigned' else 'black' }};">{{ report.status }}</td> 
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- Table for Theft Reports -->
+    <table id="theft-table" class="styled-table mt-3">
+        <thead>
+            <tr style="font-size: 13px;">
+                <th>Date</th>
+                <th>Stolen Items</th>
+                <th>Stolen Value</th>
+                <th>Theft Description</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for report in theft_reports %}
+            <tr style="font-size: 13px;">
+                <td>{{ report.date_time }}</td>
+                <td>{{ report.stolen_items }}</td>
+                <td>{{ report.stolen_value }}</td>
+                <td>{{ report.theft_description }}</td>
+                <td style="font-weight: bold; color: {{ 'orange' if report.status == 'pending' else 'green' if report.status == 'assigned' else 'black' }};">{{ report.status }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- Table for Damage Reports -->
+    <table id="damage-table" class="styled-table mt-3">
+        <thead>
+            <tr style="font-size: 13px;">
+                <th>Date</th>
+                <th>Items Destroyed</th>
+                <th>Value Destroyed</th>
+                <th>Damage Description</th>
+                <th>Estimated Repair Cost</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for report in damage_reports %}
+            <tr style="font-size: 13px;">
+                <td>{{ report.date_time }}</td>
+                <td>{{ report.items_destroyed }}</td>
+                <td>{{ report.value_of_destroyed }}</td>
+                <td>{{ report.damage_description }}</td>
+                <td>{{ report.estimated_repair }}</td>
+                <td style="font-weight: bold; color: {{ 'orange' if report.status == 'pending' else 'green' if report.status == 'assigned' else 'black' }};">{{ report.status }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+<!-- Popup Card -->
+<div id="popup-card" class="hidden fixed top-0 left-0 w-full h-full bg-gray-800 bg-opacity-50 flex justify-center items-center">
+    <div class="bg-white rounded p-4 shadow-lg">
+        <h3 class="text-xl font-semibold mb-4">Usernames</h3>
+        <ul id="username-list"></ul>
+        <button id="close-popup" class="mt-4 bg-red-500 text-white px-4 py-2 rounded">Close</button>
+    </div>
+</div>
+<script>
+    function getStatusColor(status) {
+        if (status === 'pending') {
+            return 'status-pending';
+        } else if (status === 'assigned') {
+            return 'status-assigned';
+        } else {
+            return 'status-other';
+        }
+    }
+</script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const violenceBtn = document.getElementById('violence-btn');
+        const theftBtn = document.getElementById('theft-btn');
+        const damageBtn = document.getElementById('damage-btn');
+        const popupCard = document.getElementById('popup-card');
+        const closePopupBtn = document.getElementById('close-popup');
+
+        function showTable(tableToShow) {
+            document.querySelectorAll('.styled-table').forEach(table => {
+                table.classList.add('hidden');
+            });
+            tableToShow.classList.remove('hidden');
+        }
+
+        function highlightButton(buttonToHighlight) {
+            violenceBtn.style.backgroundColor = '#888';
+            theftBtn.style.backgroundColor = '#888';
+            damageBtn.style.backgroundColor = '#888';
+            buttonToHighlight.style.backgroundColor = '#3664f4';
+        }
+
+        violenceBtn.addEventListener('click', function () {
+            showTable(document.getElementById('violence-table'));
+            highlightButton(violenceBtn);
+        });
+
+        theftBtn.addEventListener('click', function () {
+            showTable(document.getElementById('theft-table'));
+            highlightButton(theftBtn);
+        });
+
+        damageBtn.addEventListener('click', function () {
+            showTable(document.getElementById('damage-table'));
+            highlightButton(damageBtn);
+        });
+
+        // Close popup event
+        closePopupBtn.addEventListener('click', function () {
+            popupCard.classList.add('hidden');
+        });
+
+        // Show the violence table by default
+        showTable(document.getElementById('violence-table'));
+        highlightButton(violenceBtn);
+
+        const assignButtons = document.querySelectorAll('.assign-btn');
+
+        assignButtons.forEach(button => {
+            button.addEventListener('click', function () {
+                const incidentId = button.getAttribute('data-incident-id');
+                document.getElementById('incident-id').value = incidentId;
+                popupCard.classList.remove('hidden');
+            });
+        });
+    });
+</script>
+{% endblock %}

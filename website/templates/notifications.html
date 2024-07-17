@@ -1,0 +1,151 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard{% endblock %}
+{% block header %}Notifications{% endblock %}
+{% block content %}
+<style>
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 10px;
+        font-size: 12px;
+    }
+
+    table td {
+        border-bottom: 1px solid inherit;
+        padding: 2px;
+    }
+
+    .solved {
+        text-decoration: line-through;
+        color: gray;
+    }
+</style>
+
+{% if incidents %}
+{% for incident in incidents %}
+<div style="color: #333; background-color: #fff; font-size: 13px;" class="incident p-6 rounded mt-6 shadow-lg" data-incident-id="{{ incident.incident_id }}">
+    {% if incident.incident_data %}
+    <h2 style="font-weight: bold; text-decoration-line: underline; color: #f84f6b;">
+        INCIDENT FROM {{ incident.table_name }}
+    </h2>
+    <p class="flex mt-2"><strong class="mr-7">Incident ID:</strong> {{ incident.incident_id }}</p>
+    <p class="flex mt-2"><strong class="mr-4">Assigned To:</strong> {{ incident.username }}</p>
+    <p class="flex mt-2"><strong style="margin-right: 60px;">Notes:</strong> {{ incident.notes | truncate_words(50) }}</p>
+
+    <hr class="my-3">
+
+    <div>
+        <h3 style="font-weight: bold; text-decoration-line: underline; color: #0565e9;">Details:</h3>
+        <table>
+            {% for key, value in incident.incident_data.items() %}
+            <tr>
+                <td><strong>{{ key }}:</strong></td>
+                <td>{{ value }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+        <button type="button" class="solved-button p-1 mt-3 rounded" style="background-color: #069969; color: #fff;">
+            Solved
+        </button>
+        <!-- Remove this span if you don't need to display the count after the button disappears -->
+        <span class="solved-count ml-2">
+            <!-- Solved (0) -->
+        </span>
+        
+        
+        
+        <p class="flex mt-4"
+            style="margin-left: 900px; font-size: 11px; color: #069969; font-style: italic; text-decoration-line: underline;">
+            {{ incident.assign_date }}
+        </p>
+    </div>
+    {% else %}
+    <p>No detailed data found for incident ID {{ incident.assign_date }}.</p>
+    {% endif %}
+</div>
+{% endfor %}
+{% else %}
+<p>No incidents found.</p>
+{% endif %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const solvedIncidents = JSON.parse(localStorage.getItem('solvedIncidents')) || {};
+
+        // Initialize counters for solved incidents
+        const solvedCounters = {};
+
+        // Apply solved class to incidents already marked as solved and update counters
+        document.querySelectorAll('.incident').forEach(incidentDiv => {
+            const incidentId = incidentDiv.dataset.incidentId;
+            const count = solvedIncidents[incidentId] || 0;
+
+            if (count > 0) {
+                incidentDiv.classList.add('solved');
+                // Hide the 'Solved' button permanently if already solved
+                incidentDiv.querySelector('.solved-button').style.display = 'none';
+            }
+
+            solvedCounters[incidentId] = count;
+        });
+
+        // Handle button click to mark as solved, update counter, and hide the button
+        document.querySelectorAll('.incident .solved-button').forEach(button => {
+            button.addEventListener('click', function() {
+                const incidentDiv = this.closest('.incident');
+                const incidentId = incidentDiv.dataset.incidentId;
+                incidentDiv.classList.add('solved');
+
+                // Increment solved count for the incident
+                solvedCounters[incidentId] = (solvedCounters[incidentId] || 0) + 1;
+
+                // Save the updated counters to localStorage
+                localStorage.setItem('solvedIncidents', JSON.stringify(solvedCounters));
+
+                // Hide the button after it's clicked
+                this.style.display = 'none';
+
+                // Display the count next to the button (optional, to show the count after hiding the button)
+                //this.nextElementSibling.textContent = Solved (${solvedCounters[incidentId]});
+
+                // Collect incident data (unchanged from previous code)
+                const assignDate = incidentDiv.querySelector('p:last-of-type').textContent.trim();
+                const username = incidentDiv.querySelector('p:nth-of-type(3)').textContent.replace('Assigned To:', '').trim();
+                const notes = incidentDiv.querySelector('p:nth-of-type(4)').textContent.replace('Notes:', '').trim();
+                const incidentData = {};
+                incidentDiv.querySelectorAll('table tr').forEach(row => {
+                    const key = row.querySelector('td:first-child').textContent.replace(':', '').trim();
+                    const value = row.querySelector('td:last-child').textContent.trim();
+                    incidentData[key] = value;
+                });
+
+                // Send the data to the server (unchanged from previous code)
+                fetch('/save_solved_incident', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        incident_id: incidentId,
+                        assign_date: assignDate,
+                        username: username,
+                        notes: notes,
+                        incident_data: incidentData
+                    })
+                }).then(response => response.json()).then(data => {
+                    if (data.status === 'success') {
+                        console.log('Incident marked as solved and saved.');
+                    } else {
+                        console.error('Error saving solved incident:', data.message);
+                    }
+                }).catch(error => {
+                    console.error('Error:', error);
+                });
+            });
+        });
+    });
+</script>
+
+
+
+
+{% endblock %}

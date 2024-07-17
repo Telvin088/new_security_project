@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+{% block title %}Profile{% endblock %}
+{% block content %}
+<div class="flex flex-col row justify-center items-start gap-4 border mt-3">
+    <div
+        class="bg-white white:bg-zinc-800 rounded shadow-md flex flex-col items-center justify-center p-4 md:p-8 w-full md:w-2/3">
+        <h2 class="text-lg font-semibold text-black mb-4">Contact</h2>
+        <form action="{{ url_for('profile') }}" method="POST">
+            <input type="text" name="name" placeholder="Name" class="w-full p-2 mb-4 outline-none text-black border-b">
+            <input type="email" name="email" placeholder="Email" class="w-full p-2 mb-4 outline-none text-black border-b">
+            <input type="tel" name="phone_number" placeholder="Phone Number" class="w-full p-2 mb-4 outline-none text-black border-b">
+            <textarea name="message" placeholder="Message" class="w-full p-2 mb-4 outline-none text-black border-b"></textarea>
+            <button type="submit" class="bg-blue-500 text-white p-2 rounded flex items-center">
+                Send Message
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}

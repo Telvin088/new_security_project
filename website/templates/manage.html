@@ -1,0 +1,208 @@
+{% extends 'admin_base.html' %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+<!-- Display all reports in one section -->
+<div class="p-4 rounded mt-4" style="width: 100%;">
+    <h2 class="text-xl font-semibold text-black">Incident Management</h2>
+    <p class="text-zinc-500 dark:text-zinc-400 mt-1" style="font-size: 14px;">
+        <button id="violence-btn" class="report-btn"
+            style="padding: 5px; border-radius: 3px; width: auto; background-color: #3664f4; color: #fff;">Violence</button>
+        <button id="theft-btn" class="report-btn"
+            style="padding: 5px; border-radius: 3px; width: auto; background-color:#888; color: #fff;">Theft</button>
+        <button id="damage-btn" class="report-btn"
+            style="padding: 5px; border-radius: 3px; width: auto; background-color:#888; color: #fff;">Damage</button>
+    </p>
+    <!-- Table for Violence Reports -->
+    <table id="violence-table" class="styled-table mt-3">
+        <thead>
+            <tr style="font-size: 13px;">
+                <th>Date</th>
+                <th>Incident ID</th>
+                <th>Victim Name</th>
+                <th>Victim Age</th>
+                <th>Witness</th>
+                <th>Incident Description</th>
+                <th>Username</th>
+                <th>Status</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for report in reports %}
+            <tr style="font-size: 13px;">
+                <td>{{ report.created_at }}</td>
+                <td>{{ report.incident_id }}</td>
+                <td>{{ report.victim_name }}</td>
+                <td>{{ report.victim_age }}</td>
+                <td>{{ report.witness }}</td>
+                <td>{{ report.incident_description }}</td>
+                <td>{{ report.username }}</td>
+                <td
+                    style="font-weight: bold; color: {{ 'orange' if report.status == 'pending' else 'green' if report.status == 'assigned' else 'black' }};">
+                    {{ report.status }}</td>
+                <td><button style="background-color: #0565e9; color: #fff; font-size: 13px;"
+                        class="rounded p-1 assign-btn" data-username="{{ report.username }}"
+                        data-incident-id="{{ report.incident_id }}">Assign</button></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- Table for Theft Reports -->
+    <table id="theft-table" class="styled-table mt-3 hidden">
+        <thead>
+            <tr style="font-size: 13px;">
+                <th>Date</th>
+                <th>Incident ID</th>
+                <th>Stolen Items</th>
+                <th>Stolen Value</th>
+                <th>Theft Description</th>
+                <th>Status</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for report in theft_reports %}
+            <tr style="font-size: 13px;">
+                <td>{{ report.date_time }}</td>
+                <td>{{ report.incident_id }}</td>
+                <td>{{ report.stolen_items }}</td>
+                <td>{{ report.stolen_value }}</td>
+                <td>{{ report.theft_description }}</td>
+                <td
+                    style="font-weight: bold; color: {{ 'orange' if report.status == 'pending' else 'green' if report.status == 'assigned' else 'black' }};">
+                    {{ report.status }}</td>
+                <td><button style="background-color: #0565e9; color: #fff; font-size: 13px;"
+                        class="rounded p-1 assign-btn" data-username="{{ report.username }}"
+                        data-incident-id="{{ report.incident_id }}">Assign</button></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- Table for Damage Reports -->
+    <table id="damage-table" class="styled-table mt-3 hidden">
+        <thead>
+            <tr style="font-size: 13px;">
+                <th>Date</th>
+                <th>Incident ID</th>
+                <th>Items Destroyed</th>
+                <th>Value Destroyed</th>
+                <th>Damage Description</th>
+                <th>Estimated Repair Cost</th>
+                <th>Status</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for report in damage_reports %}
+            <tr style="font-size: 13px;">
+                <td>{{ report.date_time }}</td>
+                <td>{{ report.incident_id }}</td>
+                <td>{{ report.items_destroyed }}</td>
+                <td>{{ report.value_of_destroyed }}</td>
+                <td>{{ report.damage_description }}</td>
+                <td>{{ report.estimated_repair }}</td>
+                <td
+                    style="font-weight: bold; color: {{ 'orange' if report.status == 'pending' else 'green' if report.status == 'assigned' else 'black' }};">
+                    {{ report.status }}</td>
+                <td><button style="background-color: #0565e9; color: #fff; font-size: 13px;"
+                        class="rounded p-1 assign-btn" data-username="{{ report.username }}"
+                        data-incident-id="{{ report.incident_id }}">Assign</button></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+<!-- Popup Card -->
+<div style="color: #333;" id="popup-card"
+    class="hidden fixed top-0 left-0 w-full h-full bg-gray-800 bg-opacity-50 flex justify-center items-center">
+    <div class="bg-white rounded p-4 shadow-lg">
+        <h3 class="text-xl font-semibold mb-4">Assign User</h3>
+        <form id="assign-form" action="{{ url_for('assign_incident') }}" method="post">
+            <label for="incident-id" class="block mb-2">Incident ID:</label>
+            <input type="text" id="incident-id" name="incident_id" class="block w-full p-2 border rounded mb-4" readonly>
+
+            <label for="assign-date" class="block mb-2">Date:</label>
+            <input type="date" id="assign-date" name="assign-date" class="block w-full p-2 border rounded mb-4"
+                required>
+
+            <label for="assign-user" class="block mb-2">User:</label>
+            <select id="assign-user" name="assign-user" class="block w-full p-2 border rounded mb-4" required>
+                <option value="" disabled selected>Select a user</option>
+                {% for user in users %}
+                <option value="{{ user.username }}">{{ user.username }}</option>
+                {% endfor %}
+            </select>
+
+            <label for="assign-notes" class="block mb-2">Notes/Comments:</label>
+            <textarea id="assign-notes" name="assign-notes" class="block w-full p-2 border rounded mb-4"
+                rows="4"></textarea>
+
+            <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded">Assign</button>
+        </form>
+
+        <button id="close-popup" class="mt-4 bg-red-500 text-white px-4 py-2 rounded">Close</button>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const popupCard = document.getElementById('popup-card');
+        const assignButtons = document.querySelectorAll('.assign-btn');
+
+        assignButtons.forEach(button => {
+            button.addEventListener('click', function () {
+                const incidentId = button.getAttribute('data-incident-id');
+                const incidentIdInput = document.getElementById('incident-id');
+                incidentIdInput.value = incidentId;  // Update displayed value
+                incidentIdInput.setAttribute('value', incidentId);  // Update value attribute
+                popupCard.classList.remove('hidden'); // Show the popup card
+            });
+        });
+        
+
+        // Close popup event
+        document.getElementById('close-popup').addEventListener('click', function () {
+            popupCard.classList.add('hidden');
+        });
+
+        const violenceBtn = document.getElementById('violence-btn');
+        const theftBtn = document.getElementById('theft-btn');
+        const damageBtn = document.getElementById('damage-btn');
+
+        function showTable(tableToShow) {
+            document.querySelectorAll('.styled-table').forEach(table => {
+                table.classList.add('hidden');
+            });
+            tableToShow.classList.remove('hidden');
+        }
+
+        function highlightButton(buttonToHighlight) {
+            violenceBtn.style.backgroundColor = '#888';
+            theftBtn.style.backgroundColor = '#888';
+            damageBtn.style.backgroundColor = '#888';
+            buttonToHighlight.style.backgroundColor = '#3664f4';
+        }
+
+        violenceBtn.addEventListener('click', function () {
+            showTable(document.getElementById('violence-table'));
+            highlightButton(violenceBtn);
+        });
+
+        theftBtn.addEventListener('click', function () {
+            showTable(document.getElementById('theft-table'));
+            highlightButton(theftBtn);
+        });
+
+        damageBtn.addEventListener('click', function () {
+            showTable(document.getElementById('damage-table'));
+            highlightButton(damageBtn);
+        });
+
+        // Show the violence table by default
+        showTable(document.getElementById('violence-table'));
+        highlightButton(violenceBtn);
+    });
+</script>
+{% endblock %}

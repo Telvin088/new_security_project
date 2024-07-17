@@ -1,0 +1,192 @@
+{% extends 'base.html' %}
+{% block header %}Reports{% endblock %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+<div class="flex">
+    <div class="container p-4 rounded mt-4" style="width: 400px; margin-left: 1px; height: auto; background-color: #ffffff;">
+        <h2 class="text-xl font-semibold text-black">Reports Form</h2>
+        <label for="issueType" class="block text-lg mb-2 text-black" style="font-size: 14px;">Type of Issue:</label>
+        <select name="issue_type" id="issueType" class="w-full p-2 border rounded-md mb-4 outline-none text-black"
+            onchange="toggleForm()">
+            <option value="">Select an issue</option>
+            <option value="violence">Violence</option>
+            <option value="theft">Theft</option>
+            <option value="damage">Damage</option>
+        </select>
+        <!-- Violence Report Form -->
+        <form action="{{ url_for('reports') }}" method="post" style="font-size: 14px;" class="mt-2">
+            <div id="violenceForm" class="issue-form hidden">
+                <label for="datetime" class="block text-lg mb-2 text-black" style="font-size: 14px;">Date & Time:</label>
+                <input type="datetime-local" name="date_time" id="datetime" class="w-full p-2 border rounded-md mb-4 outline-none text-black">
+                <label for="victimName" class="block text-lg mb-2 text-black" style="font-size: 14px;">Victim Name:</label>
+                <input type="text" name="victim_name" id="victimName" class="w-full p-2 border rounded-md mb-4 outline-none text-black">
+                <label for="victimAge" class="block text-lg mb-2 text-black" style="font-size: 14px;">Victim Age:</label>
+                <input type="number" name="victim_age" id="victimAge" class="w-full p-2 border rounded-md mb-4 outline-none text-black">
+                <label for="witness" class="block text-lg mb-2 text-black" style="font-size: 14px;">Witness(s)</label>
+                <input type="text" name="witness" id="witness" class="w-full p-2 border rounded-md mb-4 outline-none text-black">
+                <label for="violenceDescription" class="block text-lg mb-2 text-black" style="font-size: 14px;">Description of Incident:</label>
+                <textarea id="violenceDescription" name="incident_description" class="w-full p-2 border rounded-md mb-4 outline-none text-black"></textarea>
+                <button class="bg-blue-500 text-white p-2 rounded-lg mt-4">Submit</button>
+            </div>
+        </form>
+        
+        <!-- Theft Report Form -->
+        <form action="{{ url_for('save_and_display_theft_report') }}" method="post" style="font-size: 14px;" class="mt-2">
+            <div id="theftForm" class="issue-form hidden">
+                <label for="datetimeTheft" class="block text-lg mb-2 text-black" style="font-size: 14px;">Date & Time:</label>
+                <input type="datetime-local" name="date_time" id="datetimeTheft" class="w-full p-2 border rounded-md mb-4 outline-none text-black">
+                <label for="stolenItem" class="block text-lg mb-2 text-black" style="font-size: 14px;">Stolen Item:</label>
+                <input type="text" name="stolen_items" id="stolenItem" class="w-full p-2 border rounded-md mb-4 outline-none text-black">
+                <label for="stolenValue" class="block text-lg mb-2 text-black" style="font-size: 14px;">Value of Stolen Item:</label>
+                <input type="text" name="stolen_value" id="stolenValue" class="w-full p-2 border rounded-md mb-4 outline-none text-black">
+                <label for="theftDescription" class="block text-lg mb-2 text-black" style="font-size: 14px;">Description of Theft:</label>
+                <textarea id="theftDescription" name="theft_description" class="w-full p-2 border rounded-md mb-4 outline-none text-black"></textarea>
+                <button class="bg-blue-500 text-white p-2 rounded-lg mt-4">Submit</button>
+            </div>
+        </form>
+        
+        <!-- Damage Report Form -->
+        <form action="{{ url_for('save_damage_report') }}" method="post" style="font-size: 14px;" class="mt-2">
+            <div id="damageForm" class="issue-form hidden">
+                <label for="datetimeDamage" class="block text-lg mb-2 text-black" style="font-size: 14px;">Date & Time:</label>
+                <input type="datetime-local" name="date_time" id="datetimeDamage" class="w-full p-2 border rounded-md mb-4 outline-none text-black">
+                <label for="itemsDestroyed" class="block text-lg mb-2 text-black" style="font-size: 14px;">Item(s) Destroyed:</label>
+                <input type="number" name="items_destroyed" id="itemsDestroyed" class="w-full p-2 border rounded-md mb-4 outline-none text-black">
+                <label for="valueDestroyed" class="block text-lg mb-2 text-black" style="font-size: 14px;">Value of Item(s) Destroyed:</label>
+                <input type="number" name="value_of_destroyed" id="valueDestroyed" class="w-full p-2 border rounded-md mb-4 outline-none text-black">
+                <label for="damageDescription" class="block text-lg mb-2 text-black" style="font-size: 14px;">Damage Description:</label>
+                <textarea id="damageDescription" name="damage_description" class="w-full p-2 border rounded-md mb-4 outline-none text-black"></textarea>
+                <label for="repairCost" class="block text-lg mb-2 text-black" style="font-size: 14px;">Estimated Repair Cost:</label>
+                <input type="number" name="estimated_repair" id="repairCost" class="w-full p-2 border rounded-md mb-4 outline-none text-black">
+                <button class="bg-blue-500 text-white p-2 rounded-lg mt-4">Submit</button>
+            </div>
+        </form>
+    </div>
+    
+    <!-- Display all reports in one section -->
+    <div class="bg-white white:bg-zinc-800 p-4 rounded mt-4 ml-4" style="width: 650px;">
+        <h2 class="text-xl font-semibold text-black">Recent Incidents</h2>
+        <p class="text-zinc-500 dark:text-zinc-400 mt-1" style="font-size: 14px;">
+            <button id="violence-btn" class="report-btn" style="padding: 5px; border-radius: 3px; width: auto; background-color: #3664f4; color: #fff;">Violence</button>
+            <button id="theft-btn" class="report-btn" style="padding: 5px; border-radius: 3px; width: auto; background-color:#888; color: #fff;">Theft</button>
+            <button id="damage-btn" class="report-btn" style="padding: 5px; border-radius: 3px; width: auto; background-color:#888; color: #fff;">Damage</button>
+        </p>
+        <!-- Table for Violence Reports -->
+        <table id="violence-table" class="styled-table mt-3">
+            <thead>
+                <tr style="font-size: 13px;">
+                    <th>Date</th>
+                    <th>Victim Name</th>
+                    <th>Victim Age</th>
+                    <th>Witness</th>
+                    <th>Incident Description</th>
+                    <th>Username</th> <!-- New column for displaying the username -->
+                </tr>
+            </thead>
+            <tbody>
+                {% for report in reports %}
+                <tr style="font-size: 13px;">
+                    <td>{{ report.date_time }}</td>
+                    <td>{{ report.victim_name }}</td>
+                    <td>{{ report.victim_age }}</td>
+                    <td>{{ report.witness }}</td>
+                    <td>{{ report.incident_description }}</td>
+                    <td>{{ report.username }}</td> <!-- Display the username -->
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        
+        <!-- Table for Theft Reports -->
+        <table id="theft-table" class="styled-table mt-3">
+            <thead>
+                <tr style="font-size: 13px;">
+                    <th>Date</th>
+                    <th>Stolen Items</th>
+                    <th>Stolen Value</th>
+                    <th>Theft Description</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for report in theft_reports %}
+                <tr style="font-size: 13px;">
+                    <td>{{ report.date_time }}</td>
+                    <td>{{ report.stolen_items }}</td>
+                    <td>{{ report.stolen_value }}</td>
+                    <td>{{ report.theft_description }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        
+        <!-- Table for Damage Reports -->
+        <table id="damage-table" class="styled-table mt-3">
+            <thead>
+                <tr style="font-size: 13px;">
+                    <th>Date</th>
+                    <th>Items Destroyed</th>
+                    <th>Value Destroyed</th>
+                    <th>Damage Description</th>
+                    <th>Estimated Repair Cost</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for report in damage_reports %}
+                <tr style="font-size: 13px;">
+                    <td>{{ report.date_time }}</td>
+                    <td>{{ report.items_destroyed }}</td>
+                    <td>{{ report.value_of_destroyed }}</td>
+                    <td>{{ report.damage_description }}</td>
+                    <td>{{ report.estimated_repair }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const violenceBtn = document.getElementById('violence-btn');
+        const theftBtn = document.getElementById('theft-btn');
+        const damageBtn = document.getElementById('damage-btn');
+
+        const violenceTable = document.getElementById('violence-table');
+        const theftTable = document.getElementById('theft-table');
+        const damageTable = document.getElementById('damage-table');
+
+        function showTable(tableToShow) {
+            violenceTable.classList.add('hidden');
+            theftTable.classList.add('hidden');
+            damageTable.classList.add('hidden');
+            tableToShow.classList.remove('hidden');
+        }
+
+        function highlightButton(buttonToHighlight) {
+            violenceBtn.style.backgroundColor = '#888';
+            theftBtn.style.backgroundColor = '#888';
+            damageBtn.style.backgroundColor = '#888';
+            buttonToHighlight.style.backgroundColor = '#3664f4';
+        }
+
+        violenceBtn.addEventListener('click', function() {
+            showTable(violenceTable);
+            highlightButton(violenceBtn);
+        });
+
+        theftBtn.addEventListener('click', function() {
+            showTable(theftTable);
+            highlightButton(theftBtn);
+        });
+
+        damageBtn.addEventListener('click', function() {
+            showTable(damageTable);
+            highlightButton(damageBtn);
+        });
+
+        // Show the violence table by default
+        showTable(violenceTable);
+        highlightButton(violenceBtn);
+    });
+</script>
+{% endblock %}

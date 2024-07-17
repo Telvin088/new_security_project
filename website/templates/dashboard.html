@@ -1,0 +1,174 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+<div class="grid grid-cols-1 lg:grid-cols-1 gap-4 mt-6" style="height: 400px;">
+    <div class="bg-white white:bg-zinc-800 p-4 rounded" style="width: 100%;">
+        <div class="flex items-baseline justify-between">
+            <h2 class="text-xl font-semibold text-black">Incidents Status</h2>
+        </div>
+        <!-- Display all reports in one section -->
+        <div class="rounded" style="width: 100%;">
+            <p class="text-zinc-500 dark:text-zinc-400 mt-1" style="font-size: 14px;">
+                <button id="violence-btn" class="report-btn"
+                    style="padding: 5px; border-radius: 3px; width: auto; background-color: #3664f4; color: #fff;">Violence</button>
+                <button id="theft-btn" class="report-btn"
+                    style="padding: 5px; border-radius: 3px; width: auto; background-color:#888; color: #fff;">Theft</button>
+                <button id="damage-btn" class="report-btn"
+                    style="padding: 5px; border-radius: 3px; width: auto; background-color:#888; color: #fff;">Damage</button>
+            </p>
+            <!-- Table for Violence Reports -->
+            <table id="violence-table" class="styled-table mt-3">
+                <thead>
+                    <tr style="font-size: 13px;">
+                        <th>Date</th>
+                        <th>Victim Name</th>
+                        <th>Victim Age</th>
+                        <th>Witness</th>
+                        <th>Incident Description</th>
+                        <th>Username</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for report in reports %}
+                    <tr style="font-size: 13px;">
+                        <td>{{ report.created_at }}</td>
+                        <td>{{ report.victim_name }}</td>
+                        <td>{{ report.victim_age }}</td>
+                        <td>{{ report.witness }}</td>
+                        <td>{{ report.incident_description }}</td>
+                        <td>{{ report.username }}</td>
+                        <td
+                            style="font-weight: bold; color: {{ 'orange' if report.status == 'pending' else 'green' if report.status == 'assigned' else 'black' }};">
+                            {{ report.status }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            <!-- Table for Theft Reports -->
+            <table id="theft-table" class="styled-table mt-3 hidden">
+                <thead>
+                    <tr style="font-size: 13px;">
+                        <th>Date</th>
+                        <th>Stolen Items</th>
+                        <th>Stolen Value</th>
+                        <th>Theft Description</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for report in theft_reports %}
+                    <tr style="font-size: 13px;">
+                        <td>{{ report.date_time }}</td>
+                        <td>{{ report.stolen_items }}</td>
+                        <td>{{ report.stolen_value }}</td>
+                        <td>{{ report.theft_description }}</td>
+                        <td
+                            style="font-weight: bold; color: {{ 'orange' if report.status == 'pending' else 'green' if report.status == 'assigned' else 'black' }};">
+                            {{ report.status }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            <!-- Table for Damage Reports -->
+            <table id="damage-table" class="styled-table mt-3 hidden">
+                <thead>
+                    <tr style="font-size: 13px;">
+                        <th>Date</th>
+                        <th>Items Destroyed</th>
+                        <th>Value Destroyed</th>
+                        <th>Damage Description</th>
+                        <th>Estimated Repair Cost</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for report in damage_reports %}
+                    <tr style="font-size: 13px;">
+                        <td>{{ report.date_time }}</td>
+                        <td>{{ report.items_destroyed }}</td>
+                        <td>{{ report.value_of_destroyed }}</td>
+                        <td>{{ report.damage_description }}</td>
+                        <td>{{ report.estimated_repair }}</td>
+                        <td
+                            style="font-weight: bold; color: {{ 'orange' if report.status == 'pending' else 'green' if report.status == 'assigned' else 'black' }};">
+                            {{ report.status }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+<div class="grid gap-4 mt-6">
+    <div class="bg-white white:bg-zinc-800 p-4 rounded" style="width: 80%;">
+        <h2 class="text-xl font-semibold text-black">Employees</h2>
+        <p class="text-zinc-500 dark:text-zinc-400" style="font-size: 12px;"></p>
+        <div style="display: flex; flex-direction: column; color: black; font-size: 12px;" class="mt-3">
+            <div style="display: flex; font-size: 12px; padding: 8px 0; background-color: #f1f1f1;">
+                <div style="width: 50px;"></div>
+                <div style="width: 300px; text-align: left; font-weight: bold;" class="">ID</div>
+                <div class="ml-1" style="width: 200px; font-weight: bold;">Username</div>
+                <div class="ml-3" style="font-weight: bold;">Email</div>
+            </div>
+            {% for user in users %}
+            <div
+                style="display: flex; align-items: center; font-size: 12px; border-bottom: 1px solid #ddd; padding: 8px 0;">
+                <div style="width: 50px;"><img style="height: 20px; width: 20px; border-radius: 50%; object-fit: cover;"
+                        src="{{ user.profile_photo }}" alt=""></div>
+                <div style="width: 300px;" class="">{{ user.session_id }}</div>
+                <div style="width: 200px;" class="ml-4 ">{{ user.username }}</div>
+                <div style="width: 250px;" class="ml-4 ">{{ user.email }}</div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    <!-- <a style="color: salmon;" href="{{ url_for('send_mail') }}">Send Mail</a> -->
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const violenceBtn = document.getElementById('violence-btn');
+        const theftBtn = document.getElementById('theft-btn');
+        const damageBtn = document.getElementById('damage-btn');
+
+        function showTable(tableToShow) {
+            document.querySelectorAll('.styled-table').forEach(table => {
+                table.classList.add('hidden');
+            });
+            tableToShow.classList.remove('hidden');
+        }
+
+        function highlightButton(buttonToHighlight) {
+            violenceBtn.style.backgroundColor = '#888';
+            theftBtn.style.backgroundColor = '#888';
+            damageBtn.style.backgroundColor = '#888';
+            buttonToHighlight.style.backgroundColor = '#3664f4';
+        }
+
+        violenceBtn.addEventListener('click', function () {
+            showTable(document.getElementById('violence-table'));
+            highlightButton(violenceBtn);
+        });
+
+        theftBtn.addEventListener('click', function () {
+            showTable(document.getElementById('theft-table'));
+            highlightButton(theftBtn);
+        });
+
+        damageBtn.addEventListener('click', function () {
+            showTable(document.getElementById('damage-table'));
+            highlightButton(damageBtn);
+        });
+
+        // Show the violence table by default and hide theft and damage tables
+        showTable(document.getElementById('violence-table'));
+        document.getElementById('theft-table').classList.add('hidden');
+        document.getElementById('damage-table').classList.add('hidden');
+    });
+</script>
+
+{% endblock %}
